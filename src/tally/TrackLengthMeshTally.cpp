@@ -205,7 +205,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event) {
       std::cout << "Amalg Tag Found on tet ";
       std::cout << tet;
       std::cout << ": ";
-      std::cout << mb->tag_get_data(amalg_tag, tet, 1, data) << std::endl;
+      std::cout << mb->tag_get_data(amalg_tag, &tet, data) << std::endl;
     
       // determine tracklength to return
       add_score_to_mesh_tally(tet, weight, event.track_length, ebin);
