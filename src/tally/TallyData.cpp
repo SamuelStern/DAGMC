@@ -60,6 +60,12 @@ double* TallyData::get_error_data(int& length) {
   return &(error_data[0]);
 }
 //---------------------------------------------------------------------------//
+double* TallyData::get_amalg_data(int& length) {
+  assert(amalg_data.size() != 0);
+  length = amalg_data.size();
+  return &(amalg_data[0]);
+}
+//---------------------------------------------------------------------------//
 double* TallyData::get_scratch_data(int& length) {
   assert(temp_tally_data.size() != 0);
   length = temp_tally_data.size();

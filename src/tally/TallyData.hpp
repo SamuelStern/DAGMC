@@ -67,12 +67,15 @@ class TallyData {
    * \brief get_tally_data(), get_error_data(), get_scratch_data()
    * \param[out] length the size of the data array
    * \return pointer to the data array
-   *
+   * 
    * Provides direct access to the data arrays for all tally points.
+   * Now includes get_amalg_data, the array of amalg tallies.
+   * get_amalg_error_data will be added later.
    */
   double* get_tally_data(int& length);
   double* get_error_data(int& length);
   double* get_scratch_data(int& length);
+  double* get_amalg_data(int& length);
 
   /**
    * \brief Resets all data arrays for this TallyData
@@ -138,6 +141,9 @@ class TallyData {
 
   // Number of tally points = tally_data.size()/num_energy_bins
   unsigned int num_tally_points;
+  
+  // Data array for storing amalgamated tallies for each amalg region
+  std::vector<double> amalg_data;
 };
 
 #endif // DAGMC_TALLY_DATA_HPP
