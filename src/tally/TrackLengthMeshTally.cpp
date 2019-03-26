@@ -202,6 +202,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event) {
       moab::Tag amalg_tag_handle;
       mb->tag_get_handle("amalg_tag", amalg_tag_handle);
       int *amalg_region;
+      const EntityHandle *testTet = tet;
       const int entryOne = 1;
       
       std::cout << std::endl << "Amalg Tag Found on tet ";
