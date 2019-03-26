@@ -200,7 +200,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event) {
     } else {
       // Now that we have a valid tet, check its amalg tag
       moab::Tag amalg_tag_handle;
-      mb->tag_get_handle("amalg_tag", amalg_tag_handle);
+      mb->tag_get_handle("AMALG_TAG", amalg_tag_handle);
       int *amalg_region;
       const int entryOne = 1;
       
