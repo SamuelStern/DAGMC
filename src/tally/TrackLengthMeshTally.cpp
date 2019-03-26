@@ -199,13 +199,13 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event) {
       return;
     } else {
       // Now that we have a valid tet, check its amalg tag
-      Tag amalg_tag;
-      int* data;
-      std::cout << std::endl;
-      std::cout << "Amalg Tag Found on tet ";
-      std::cout << tet;
-      std::cout << ": ";
-      std::cout << mb->tag_get_data(amalg_tag, tet, data) << std::endl;
+      moab::Range range;
+      moab::Tag amalg_tag_handle;
+      int *amalg_region;
+      mb->tag_get_handle("amalg_tag", amalg_tag_handle);
+      std::cout << std::endl << "Amalg Tag Found on tet ";
+      std::cout << tet << ": ";
+      std::cout << mb->tag_get_data(amalg_tag, range, amalg_region) << std::endl;
     
       // determine tracklength to return
       add_score_to_mesh_tally(tet, weight, event.track_length, ebin);
