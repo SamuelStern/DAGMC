@@ -39,6 +39,10 @@
 // (note: this paramater is ignored by GeomUtil, so don't bother trying to tune it)
 #define TRIANGLE_INTERSECTION_TOL 1e-6
 
+// Used to store the tallies of amalgamated regions TODO Move or optimize this
+// currently set to 100 since I don't expect any cases of >100 different regions
+double amalg_data[100];
+
 // used to store the intersection data
 struct ray_data {
   double intersect;
@@ -198,15 +202,21 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event) {
     if (tet == 0) {
       return;
     } else {
-      // Now that we have a valid tet, check its amalg tag
+      // Now that we have a valid tet, check its amalg tag to find its region
       moab::Tag amalg_tag_handle;
       mb->tag_get_handle("AMALG_TAG", amalg_tag_handle);
-      int *amalg_region;
-      const int entryOne = 1;
+      double amalg_region[1];
+      const int one_entity = 1;
+      mb->tag_get_data(amalg_tag_handle, &tet, one_entity, amalg_region);
       
-      std::cout << std::endl << "Amalg Tag Found on tet ";
+      //Increase the relevant amalg tally by the weighted score
+      amalg_data[(int)(amalg_region[0] + 0.5)] += weight*event.track_length;
+      
+      //Test data to ensure this works. TODO remove
+      std::cout << "Amalg Tag Found on tet ";
       std::cout << tet << ": ";
-      std::cout << mb->tag_get_data(amalg_tag_handle, &tet, entryOne, amalg_region) << std::endl;
+      std::cout << *amalg_region << std::endl;
+      std::cout << "Region total: " << amalg_data[(int)(amalg_region[0] + 0.5)] << std::endl;
     
       // determine tracklength to return
       add_score_to_mesh_tally(tet, weight, event.track_length, ebin);
