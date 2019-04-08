@@ -165,5 +165,17 @@ void MeshTally::add_score_to_mesh_tally(const moab::EntityHandle& tally_point,
   data->add_score_to_tally(point_index, weighted_score, ebin);
 }
 //---------------------------------------------------------------------------//
+void MeshTally::add_score_to_amalg_tally(int amalg_region, double weight, double score,
+                                        unsigned int ebin) {
+  double weighted_score = weight * score;
+  //Point index here is (amalg_region) elements past (NUM_AMALG_REGIONS)
+  //elements before the end of the list. 
+  unsigned int point_index = data->get_tally_size() - data->NUM_AMALG_REGIONS
+  							 + amalg_region;
+
+  // add score to tally data for the current history
+  data->add_score_to_tally(point_index, weighted_score, ebin);
+}
+//---------------------------------------------------------------------------//
 
 // end of MCNP5/dagmc/MeshTally.cpp

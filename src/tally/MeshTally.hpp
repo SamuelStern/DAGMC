@@ -148,6 +148,20 @@ class MeshTally : public Tally {
    */
   void add_score_to_mesh_tally(const moab::EntityHandle& tally_point,
                                double weight, double score, unsigned int ebin);
+                               
+   /**
+   * \brief Adds weight * score to the amalg tally for the tally point
+   * \param[in] tally_point entity handle representing tally point
+   * \param[in] weight the multiplier value for the score to be tallied
+   * \param[in] score the score that is to be tallied
+   * \param[in] ebin the energy bin index corresponding to the energy
+   * \param[in] amalg_region the region whose amalg tally is being increased
+   *
+   * The weight and ebin can be obtained using Tally::get_score_multiplier
+   * and Tally::get_energy_bin respectively.
+   */
+  void add_score_to_amalg_tally(int amalg_region, double weight, double score, 
+  								unsigned int ebin);
 };
 
 #endif // DAGMC_MESHTALLY_HPP

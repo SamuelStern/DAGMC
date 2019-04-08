@@ -75,7 +75,17 @@ class TallyData {
   double* get_tally_data(int& length);
   double* get_error_data(int& length);
   double* get_scratch_data(int& length);
-  double* get_amalg_data(int& length);
+  
+  //Tools for implementing amalgamation (that don't need a MOAB interface)
+  int NUM_AMALG_REGIONS = 100;
+  
+  /**
+   * \brief get_tally_size
+   * \return TALLY_DATA_SIZE, the size of temp_tally_data
+   * 
+   * Provides easy access to size of temp data array, used in amalgamation
+   */
+  unsigned int get_tally_size() const;
 
   /**
    * \brief Resets all data arrays for this TallyData
@@ -141,9 +151,6 @@ class TallyData {
 
   // Number of tally points = tally_data.size()/num_energy_bins
   unsigned int num_tally_points;
-  
-  // Data array for storing amalgamated tallies for each amalg region
-  std::vector<double> amalg_data;
 };
 
 #endif // DAGMC_TALLY_DATA_HPP

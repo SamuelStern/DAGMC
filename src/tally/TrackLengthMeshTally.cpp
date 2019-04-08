@@ -202,24 +202,27 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event) {
     if (tet == 0) {
       return;
     } else {
-      // Now that we have a valid tet, check its amalg tag to find its region
-      moab::Tag amalg_tag_handle;
-      mb->tag_get_handle("AMALG_TAG", amalg_tag_handle);
-      double amalg_region[1];
+    
+      //These should probably be placed elsewhere, but we need the mb interface
+      //here. The vars should probably be in an hpp file.
+  	  moab::Tag amalg_tag_handle;
+  	  mb->tag_get_handle("AMALG_TAG", amalg_tag_handle);
+  	  double amalg_region[1];
+      int amalg_region_int;
       const int one_entity = 1;
-      mb->tag_get_data(amalg_tag_handle, &tet, one_entity, amalg_region);
       
-      //Increase the relevant amalg tally by the weighted score
-      amalg_data[(int)(amalg_region[0] + 0.5)] += weight*event.track_length;
+      // Now that we have a valid tet, check its amalg tag to find its region
+      mb->tag_get_data(amalg_tag_handle, &tet, one_entity, amalg_region);
+      amalg_region_int = (int)(amalg_region[0] + 0.5);
       
       //Test data to ensure this works. TODO remove
       std::cout << "Amalg Tag Found on tet ";
       std::cout << tet << ": ";
       std::cout << *amalg_region << std::endl;
-      std::cout << "Region total: " << amalg_data[(int)(amalg_region[0] + 0.5)] << std::endl;
-    
+      
       // determine tracklength to return
       add_score_to_mesh_tally(tet, weight, event.track_length, ebin);
+      add_score_to_amalg_tally(amalg_region_int, weight, event.track_length, ebin);
       //    found_crossing = true;
       return;
     }

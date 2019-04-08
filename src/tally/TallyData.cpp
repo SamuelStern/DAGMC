@@ -60,12 +60,6 @@ double* TallyData::get_error_data(int& length) {
   return &(error_data[0]);
 }
 //---------------------------------------------------------------------------//
-double* TallyData::get_amalg_data(int& length) {
-  assert(amalg_data.size() != 0);
-  length = amalg_data.size();
-  return &(amalg_data[0]);
-}
-//---------------------------------------------------------------------------//
 double* TallyData::get_scratch_data(int& length) {
   assert(temp_tally_data.size() != 0);
   length = temp_tally_data.size();
@@ -81,7 +75,7 @@ void TallyData::zero_tally_data() {
 void TallyData::resize_data_arrays(unsigned int tally_points) {
   assert(tally_points > 0);
   num_tally_points = tally_points;
-  unsigned int new_size = num_tally_points * num_energy_bins;
+  unsigned int new_size = num_tally_points * num_energy_bins + NUM_AMALG_REGIONS;
 
   tally_data.resize(new_size, 0);
   error_data.resize(new_size, 0);
@@ -90,6 +84,10 @@ void TallyData::resize_data_arrays(unsigned int tally_points) {
 //---------------------------------------------------------------------------//
 unsigned int TallyData::get_num_energy_bins() const {
   return num_energy_bins;
+}
+//---------------------------------------------------------------------------//
+unsigned int TallyData::get_tally_size() const { //TODO make this work
+  return temp_tally_data.size();
 }
 //---------------------------------------------------------------------------//
 bool TallyData::has_total_energy_bin() const {
