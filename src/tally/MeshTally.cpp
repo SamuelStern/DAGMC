@@ -150,6 +150,19 @@ moab::ErrorCode MeshTally::setup_tags(moab::Interface* mbi, const char* prefix) 
                              total_error_tag,
                              moab::MB_TAG_DENSE | moab::MB_TAG_CREAT);
   MB_CHK_SET_ERR(rval, "Failed to get the tag handle");
+  
+  //create single tag to store amalg region
+  rval = mbi->tag_get_handle("AMALG_TAG", 
+  							 amalg_tag_handle);
+  MB_CHK_SET_ERR(rval, "Failed to get the amalg tag handle");
+  
+  //create single tag to store amalg tally
+  rval = mbi->tag_get_handle("AMALG_TALLY", 
+  							 one_entity, 
+  							 moab::MB_TYPE_DOUBLE,
+  							 amalg_tally_handle, 
+  							 moab::MB_TAG_DENSE | moab::MB_TAG_CREAT);
+  MB_CHK_SET_ERR(rval, "Failed to get the amalg tally handle");
 
 
   return moab::MB_SUCCESS;
@@ -165,13 +178,23 @@ void MeshTally::add_score_to_mesh_tally(const moab::EntityHandle& tally_point,
   data->add_score_to_tally(point_index, weighted_score, ebin);
 }
 //---------------------------------------------------------------------------//
-void MeshTally::add_score_to_amalg_tally(int amalg_region, double weight, double score,
-                                        unsigned int ebin) {
+void MeshTally::add_score_to_amalg_tally(const moab::EntityHandle& tally_point,
+										 double weight, double score,
+                                         unsigned int ebin, 
+                                         moab::Interface* mbi) {
+  // Now that we have a valid tet, check its amalg tag to find its region
+  mbi->tag_get_data(amalg_tag_handle, &tally_point, one_entity, amalg_region);
+  amalg_region_int = (int)(amalg_region[0] + 0.5);
+                                        
   double weighted_score = weight * score;
   //Point index here is (amalg_region) elements past (NUM_AMALG_REGIONS)
   //elements before the end of the list. 
   unsigned int point_index = data->get_tally_size() - data->NUM_AMALG_REGIONS
-  							 + amalg_region;
+  							 + amalg_region_int;
+  							 
+  //TODO delete this
+  std::cout << "From tet " << tally_point << ", found region " << amalg_region_int;
+  std::cout << ". Added to tally: " << weighted_score << std::endl;
 
   // add score to tally data for the current history
   data->add_score_to_tally(point_index, weighted_score, ebin);

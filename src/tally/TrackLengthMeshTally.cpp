@@ -203,29 +203,40 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event) {
       return;
     } else {
     
-      //These should probably be placed elsewhere, but we need the mb interface
-      //here. The vars should probably be in an hpp file.
-  	  moab::Tag amalg_tag_handle;
-  	  mb->tag_get_handle("AMALG_TAG", amalg_tag_handle);
-  	  double amalg_region[1];
-      int amalg_region_int;
-      const int one_entity = 1;
-      
-      // Now that we have a valid tet, check its amalg tag to find its region
-      mb->tag_get_data(amalg_tag_handle, &tet, one_entity, amalg_region);
-      amalg_region_int = (int)(amalg_region[0] + 0.5);
-      
-      //Test data to ensure this works. TODO remove
-      std::cout << "Amalg Tag Found on tet ";
-      std::cout << tet << ": ";
-      std::cout << *amalg_region << std::endl;
-      
       // determine tracklength to return
       add_score_to_mesh_tally(tet, weight, event.track_length, ebin);
-      add_score_to_amalg_tally(amalg_region_int, weight, event.track_length, ebin);
+      add_score_to_amalg_tally(tet, weight, event.track_length, ebin, mb);
       //    found_crossing = true;
+  
+  	  //TODO also move all this (till return) to be handled by write_data
+      //Update all tets with amalg tally data
+      /*
+  	  Range all_tets;
+  	  rval = mb->get_entities_by_dimension(tally_mesh_set, 3, all_tets);
+  	  if (rval != MB_SUCCESS) {
+   	    std::cout << "Failed to get 3d entities" << std::endl;
+    	exit(1);
+  	  }
+  	  assert(rval == MB_SUCCESS);
+  	  
+  	  data_arr = data->get_scratch_data(data_length);
+  	  std::vector<double> temp_tally_data(data_arr, 
+  			data_arr + data->get_tally_size() );
+  	  
+	  for (Range::const_iterator i = all_tets.begin(); i != all_tets.end(); ++i) {
+    	EntityHandle t = *i;
+    	//TODO set rval checks on all mb calls
+    	mb->tag_get_data(amalg_tag_handle, &t, one_entity, &amalg_region);
+    	amalg_loc = data->get_tally_size() - data->NUM_AMALG_REGIONS 
+    		+ (int)(*amalg_region+0.5);
+    	mb->tag_set_data(amalg_tally_handle, &t, one_entity, 
+    		&temp_tally_data.at(amalg_loc) );
+	  }
+	  */
+  
       return;
-    }
+    } //end "if tet found"
+    
   }
 
   // sort the intersection data

@@ -86,7 +86,7 @@ unsigned int TallyData::get_num_energy_bins() const {
   return num_energy_bins;
 }
 //---------------------------------------------------------------------------//
-unsigned int TallyData::get_tally_size() const { //TODO make this work
+unsigned int TallyData::get_tally_size() const {
   return temp_tally_data.size();
 }
 //---------------------------------------------------------------------------//

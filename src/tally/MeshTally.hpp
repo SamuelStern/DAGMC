@@ -84,6 +84,15 @@ class MeshTally : public Tally {
   //  std::vector<moab::Tag> tally_tags, error_tags;
   moab::Tag tally_tag, error_tag;
   moab::Tag total_tally_tag, total_error_tag;
+  
+  /// Tags for storing amalg data
+  moab::Tag amalg_tag_handle;
+  moab::Tag amalg_tally_handle;
+  
+  //Vars to assist storing amalg data
+  double amalg_region[1];
+  int amalg_region_int;
+  const int one_entity = 1;
 
   // >>> PROTECTED METHODS
 
@@ -155,13 +164,13 @@ class MeshTally : public Tally {
    * \param[in] weight the multiplier value for the score to be tallied
    * \param[in] score the score that is to be tallied
    * \param[in] ebin the energy bin index corresponding to the energy
-   * \param[in] amalg_region the region whose amalg tally is being increased
    *
    * The weight and ebin can be obtained using Tally::get_score_multiplier
    * and Tally::get_energy_bin respectively.
    */
-  void add_score_to_amalg_tally(int amalg_region, double weight, double score, 
-  								unsigned int ebin);
+  void add_score_to_amalg_tally(const moab::EntityHandle& tally_point, 
+  								double weight, double score, unsigned int ebin,
+  								moab::Interface* mbi);
 };
 
 #endif // DAGMC_MESHTALLY_HPP
