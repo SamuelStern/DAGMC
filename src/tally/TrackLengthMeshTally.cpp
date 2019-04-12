@@ -317,15 +317,15 @@ void TrackLengthMeshTally::write_data(double num_histories) {
       MB_CHK_SET_ERR_RET(rval, "Failed to set error_tag " + std::to_string(rval) + " " + std::to_string(t));
     }
     
-    //Begin amalg handling
-    std::pair <double, double> amalg_data = data->get_amalg(tet_index);
-    double amalg_tally = amalg_data.first;
-    double amalg_error = amalg_data.second;
-    
-    //Obtain tag handle data
+    //Obtain tag handle
     rval = mb->tag_get_data(amalg_tag_handle, &t, 1, &amalg_region);
     MB_CHK_SET_ERR_RET(rval, "Failed to get amalg tag handle");
     int region_int = (int)(*amalg_region+0.5);
+    
+    //Obtain amalg data
+    std::pair <double, double> amalg_data = data->get_amalg(region_int);
+    double amalg_tally = amalg_data.first;
+    double amalg_error = amalg_data.second;
    
     if(region_int >= 0){
        //If a proper region is assigned set its amalg data accordingly
@@ -334,9 +334,9 @@ void TrackLengthMeshTally::write_data(double num_histories) {
       rval = mb->tag_set_data(amalg_error_handle, &t, 1, &amalg_error);
       MB_CHK_SET_ERR_RET(rval, "Failed to set amalg_error");
       
-      std::cout << "Set amalg tally " << amalg_tally << " with error " 
+      /*std::cout << "Set amalg tally " << amalg_tally << " with error " 
       				<< amalg_error << " in region " << region_int << std::endl;
-      				
+      	*/			
     }
   }
 
