@@ -207,33 +207,6 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event) {
       add_score_to_mesh_tally(tet, weight, event.track_length, ebin);
       add_score_to_amalg_tally(tet, weight, event.track_length, ebin, mb);
       //    found_crossing = true;
-  
-  	  //TODO also move all this (till return) to be handled by write_data
-      //Update all tets with amalg tally data
-      /*
-  	  Range all_tets;
-  	  rval = mb->get_entities_by_dimension(tally_mesh_set, 3, all_tets);
-  	  if (rval != MB_SUCCESS) {
-   	    std::cout << "Failed to get 3d entities" << std::endl;
-    	exit(1);
-  	  }
-  	  assert(rval == MB_SUCCESS);
-  	  
-  	  data_arr = data->get_scratch_data(data_length);
-  	  std::vector<double> temp_tally_data(data_arr, 
-  			data_arr + data->get_tally_size() );
-  	  
-	  for (Range::const_iterator i = all_tets.begin(); i != all_tets.end(); ++i) {
-    	EntityHandle t = *i;
-    	//TODO set rval checks on all mb calls
-    	mb->tag_get_data(amalg_tag_handle, &t, one_entity, &amalg_region);
-    	amalg_loc = data->get_tally_size() - data->NUM_AMALG_REGIONS 
-    		+ (int)(*amalg_region+0.5);
-    	mb->tag_set_data(amalg_tally_handle, &t, one_entity, 
-    		&temp_tally_data.at(amalg_loc) );
-	  }
-	  */
-  
       return;
     } //end "if tet found"
     
@@ -343,11 +316,36 @@ void TrackLengthMeshTally::write_data(double num_histories) {
       rval = mb->tag_set_data(total_error_tag, &t, 1, &rel_err);
       MB_CHK_SET_ERR_RET(rval, "Failed to set error_tag " + std::to_string(rval) + " " + std::to_string(t));
     }
+    
+    //Begin amalg handling
+    std::pair <double, double> amalg_data = data->get_amalg(tet_index);
+    double amalg_tally = amalg_data.first;
+    double amalg_error = amalg_data.second;
+    
+    //Obtain tag handle data
+    rval = mb->tag_get_data(amalg_tag_handle, &t, 1, &amalg_region);
+    MB_CHK_SET_ERR_RET(rval, "Failed to get amalg tag handle");
+    int region_int = (int)(*amalg_region+0.5);
+   
+    if(region_int >= 0){
+       //If a proper region is assigned set its amalg data accordingly
+      rval = mb->tag_set_data(amalg_tally_handle, &t, 1, &amalg_tally);
+      MB_CHK_SET_ERR_RET(rval, "Failed to set amalg_tally");
+      rval = mb->tag_set_data(amalg_error_handle, &t, 1, &amalg_error);
+      MB_CHK_SET_ERR_RET(rval, "Failed to set amalg_error");
+      
+      std::cout << "Set amalg tally " << amalg_tally << " with error " 
+      				<< amalg_error << " in region " << region_int << std::endl;
+      				
+    }
   }
 
   std::vector<Tag> output_tags;
   output_tags.push_back(tally_tag);
   output_tags.push_back(error_tag);
+  output_tags.push_back(amalg_tag_handle);
+  output_tags.push_back(amalg_tally_handle);
+  output_tags.push_back(amalg_error_handle);
   if (data->has_total_energy_bin()) {
     output_tags.push_back(total_tally_tag);
     output_tags.push_back(total_error_tag);

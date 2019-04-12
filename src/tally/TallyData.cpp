@@ -48,6 +48,17 @@ std::pair <double, double> TallyData::get_data(unsigned int tally_point_index,
   return std::make_pair(tally, error);
 }
 //---------------------------------------------------------------------------//
+std::pair <double, double> TallyData::get_amalg(unsigned int amalg_region_index
+                                               ) const {
+
+  assert(amalg_region_index < num_tally_points);
+
+  double tally = amalg_tally.at(amalg_region_index);
+  double error = amalg_error.at(amalg_region_index);
+
+  return std::make_pair(tally, error);
+}
+//---------------------------------------------------------------------------//
 double* TallyData::get_tally_data(int& length) {
   assert(tally_data.size() != 0);
   length = tally_data.size();
@@ -80,6 +91,10 @@ void TallyData::resize_data_arrays(unsigned int tally_points) {
   tally_data.resize(new_size, 0);
   error_data.resize(new_size, 0);
   temp_tally_data.resize(new_size, 0);
+  
+  //Also resize amalg data structs
+  amalg_tally.resize(NUM_AMALG_REGIONS, 0);
+  amalg_error.resize(NUM_AMALG_REGIONS, 0);
 }
 //---------------------------------------------------------------------------//
 unsigned int TallyData::get_num_energy_bins() const {
@@ -98,7 +113,6 @@ bool TallyData::has_total_energy_bin() const {
 //---------------------------------------------------------------------------//
 void TallyData::end_history() {
   std::set<unsigned int>::iterator it;
-
   // add sum of scores for this history to mesh tally for each tally point
   for (it = visited_this_history.begin(); it != visited_this_history.end(); ++it) {
     for (unsigned int j = 0; j < num_energy_bins; ++j) {
@@ -113,6 +127,22 @@ void TallyData::end_history() {
       // reset temp_tally_data array for the next particle history
       history_score = 0;
     }
+  }
+  
+  std::cout << std::endl << "Added all normal tally element scores." << std::endl << std::endl;
+  
+  // add sum of scores for all amalg regions to the amalg tally
+  for (int region = 0; region < NUM_AMALG_REGIONS; region++ ) {
+  	double& amalg_score = temp_tally_data.at(
+  			get_tally_size() - NUM_AMALG_REGIONS + region);
+  	double& amTally = amalg_tally.at(region);
+  	double& amError = amalg_error.at(region);
+  	
+  	amTally += amalg_score;
+  	amError += amalg_score * amalg_score;
+  	
+  	//Reset temp amalg data for next history
+  	amalg_score = 0;
   }
 
   // reset set of tally points for next particle history
@@ -136,6 +166,14 @@ void TallyData::add_score_to_tally(unsigned int tally_point_index,
   }
 
   visited_this_history.insert(tally_point_index);
+}
+//---------------------------------------------------------------------------//
+void TallyData::add_score_to_amalg(unsigned int amalg_region_index,
+                                   double score) {
+  assert(tally_point_index < num_tally_points);
+
+  // update tally for this history with new score
+  temp_tally_data.at(amalg_region_index) += score;
 }
 //---------------------------------------------------------------------------//
 

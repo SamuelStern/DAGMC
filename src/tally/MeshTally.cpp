@@ -163,6 +163,14 @@ moab::ErrorCode MeshTally::setup_tags(moab::Interface* mbi, const char* prefix) 
   							 amalg_tally_handle, 
   							 moab::MB_TAG_DENSE | moab::MB_TAG_CREAT);
   MB_CHK_SET_ERR(rval, "Failed to get the amalg tally handle");
+  
+  //create single tag to store amalg tally
+  rval = mbi->tag_get_handle("AMALG_ERROR", 
+  							 one_entity, 
+  							 moab::MB_TYPE_DOUBLE,
+  							 amalg_error_handle, 
+  							 moab::MB_TAG_DENSE | moab::MB_TAG_CREAT);
+  MB_CHK_SET_ERR(rval, "Failed to get the amalg error handle");
 
 
   return moab::MB_SUCCESS;
@@ -192,12 +200,13 @@ void MeshTally::add_score_to_amalg_tally(const moab::EntityHandle& tally_point,
   unsigned int point_index = data->get_tally_size() - data->NUM_AMALG_REGIONS
   							 + amalg_region_int;
   							 
-  //TODO delete this
+  /*
   std::cout << "From tet " << tally_point << ", found region " << amalg_region_int;
   std::cout << ". Added to tally: " << weighted_score << std::endl;
+  */
 
   // add score to tally data for the current history
-  data->add_score_to_tally(point_index, weighted_score, ebin);
+  data->add_score_to_amalg(point_index, weighted_score);
 }
 //---------------------------------------------------------------------------//
 

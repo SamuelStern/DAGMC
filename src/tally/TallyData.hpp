@@ -62,6 +62,13 @@ class TallyData {
    */
   std::pair <double, double> get_data(unsigned int tally_point_index,
                                       unsigned int energy_bin) const;
+    
+  /**
+   * \brief Gets tally and error values for a single amalg region
+   * \param[in] amalg_region_index the index representing the amalg region
+   * \return pair containing (tally, error) data for the amalg region
+   */                                  
+  std::pair <double, double> get_amalg(unsigned int amalg_region_index) const;
 
   /**
    * \brief get_tally_data(), get_error_data(), get_scratch_data()
@@ -77,7 +84,7 @@ class TallyData {
   double* get_scratch_data(int& length);
   
   //Tools for implementing amalgamation (that don't need a MOAB interface)
-  int NUM_AMALG_REGIONS = 100;
+  int NUM_AMALG_REGIONS = 8;
   
   /**
    * \brief get_tally_size
@@ -129,6 +136,13 @@ class TallyData {
    * \param[in] ebin the energy bin to which score will be added
    */
   void add_score_to_tally(unsigned int tally_point_index, double score, unsigned int ebin);
+  
+  /**
+   * \brief Add a score to this TallyData for the given amalg region
+   * \param[in] amalg_region_index the index representing the amalg region
+   * \param[in] score the score to be added
+   */
+  void add_score_to_amalg(unsigned int amalg_region_index, double score);
 
  private:
   // Data array for storing sum of scores for all particle histories
@@ -136,6 +150,12 @@ class TallyData {
 
   // Data array for determining error in tally results
   std::vector<double> error_data;
+  
+  // Data array for storing scores of all amalg tallies
+  std::vector<double> amalg_tally;
+  
+  // Data array for storing error in amalg tallies
+  std::vector<double> amalg_error;
 
   // Data array for storing sum of scores for a single history
   std::vector<double> temp_tally_data;

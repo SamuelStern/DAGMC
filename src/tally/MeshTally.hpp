@@ -88,6 +88,7 @@ class MeshTally : public Tally {
   /// Tags for storing amalg data
   moab::Tag amalg_tag_handle;
   moab::Tag amalg_tally_handle;
+  moab::Tag amalg_error_handle;
   
   //Vars to assist storing amalg data
   double amalg_region[1];
