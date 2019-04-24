@@ -184,6 +184,7 @@ void MeshTally::add_score_to_mesh_tally(const moab::EntityHandle& tally_point,
 
   // add score to tally data for the current history
   data->add_score_to_tally(point_index, weighted_score, ebin);
+  //std::cout << "Adding weighted score to tet: " << weighted_score << std::endl;
 }
 //---------------------------------------------------------------------------//
 void MeshTally::add_score_to_amalg_tally(const moab::EntityHandle& tally_point,
@@ -200,11 +201,9 @@ void MeshTally::add_score_to_amalg_tally(const moab::EntityHandle& tally_point,
   unsigned int point_index = data->get_tally_size() - data->NUM_AMALG_REGIONS
   							 + amalg_region_int - 1;
   							 
-  /*
-  std::cout << "Found region " << amalg_region_int << ". Added to tally: ";
-  std::cout << weighted_score << " At position " << point_index << std::endl;
-  */
-
+  /*std::cout << "Found region " << amalg_region_int << ". Added to tally: ";
+  std::cout << weighted_score << std::endl;
+	*/
   // add score to tally data for the current history
   data->add_score_to_amalg(point_index, weighted_score);
 }

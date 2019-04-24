@@ -129,12 +129,17 @@ void TallyData::end_history() {
     }
   }
   
+  // reset set of tally points for next particle history
+  visited_this_history.clear();
+  
   // add sum of scores for all amalg regions to the amalg tally
   for (int region = 0; region < NUM_AMALG_REGIONS; region++ ) {
   	double& amalg_score = temp_tally_data.at(
   			get_tally_size() - NUM_AMALG_REGIONS + region - 1);
   	double& amTally = amalg_tally.at(region);
   	double& amError = amalg_error.at(region);
+  	
+  	//std::cout << "Adding to amalg " << region << ": " << amalg_score << std::endl;
   	
   	amTally += amalg_score;
   	amError += amalg_score * amalg_score;
@@ -143,8 +148,6 @@ void TallyData::end_history() {
   	amalg_score = 0;
   }
 
-  // reset set of tally points for next particle history
-  visited_this_history.clear();
 }
 //---------------------------------------------------------------------------//
 void TallyData::add_score_to_tally(unsigned int tally_point_index,

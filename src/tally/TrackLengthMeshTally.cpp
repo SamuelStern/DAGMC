@@ -39,10 +39,6 @@
 // (note: this paramater is ignored by GeomUtil, so don't bother trying to tune it)
 #define TRIANGLE_INTERSECTION_TOL 1e-6
 
-// Used to store the tallies of amalgamated regions TODO Move or optimize this
-// currently set to 100 since I don't expect any cases of >100 different regions
-double amalg_data[100];
-
 // used to store the intersection data
 struct ray_data {
   double intersect;
@@ -206,6 +202,12 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event) {
       // determine tracklength to return
       add_score_to_mesh_tally(tet, weight, event.track_length, ebin);
       add_score_to_amalg_tally(tet, weight, event.track_length, ebin, mb);
+      
+      /*
+      std::cout << "Adding to tet and amalg: " << event.track_length
+      	<< " with weight " << weight << std::endl;
+      	*/
+      	
       //    found_crossing = true;
       return;
     } //end "if tet found"
@@ -267,6 +269,8 @@ void TrackLengthMeshTally::write_data(double num_histories) {
     MB_CHK_SET_ERR_RET(rval, "Failed to get amalg tag handle");
     int region_int = (int)(*amalg_region+0.5);
     
+    //std::cout << "Adding volume " << volume << " to region " << region_int << std::endl;
+    
     amalg_volume[region_int] += volume;
   }
 
@@ -301,6 +305,8 @@ void TrackLengthMeshTally::write_data(double num_histories) {
       std::pair <double, double> tally_data = data->get_data(tet_index, j);
       double tally = tally_data.first;
       double error = tally_data.second;
+      
+      //std::cout << "Adding tally of " << tally << " to volume " << volume << std::endl;
 
       double score = (tally / (volume * num_histories));
 
@@ -343,7 +349,7 @@ void TrackLengthMeshTally::write_data(double num_histories) {
       MB_CHK_SET_ERR_RET(rval, "Failed to set error_tag " + std::to_string(rval) + " " + std::to_string(t));
     }
     
-    //Obtain tag handle
+    //Obtain amalg tag handle
     rval = mb->tag_get_data(amalg_tag_handle, &t, 1, &amalg_region);
     MB_CHK_SET_ERR_RET(rval, "Failed to get amalg tag handle");
     int region_int = (int)(*amalg_region+0.5);
@@ -359,6 +365,9 @@ void TrackLengthMeshTally::write_data(double num_histories) {
         amalg_rel_err = sqrt((amalg_error/(amalg_tally * amalg_tally)) - (1. / num_histories));
     }
     double region_volume = amalg_volume[region_int];
+    
+    //std::cout << "Adding amalg_tally of " << amalg_tally << " to volume " << region_volume << std::endl;
+    
     double amalg_score = (amalg_tally / (region_volume * num_histories));
    
     if(region_int > 0){
@@ -368,9 +377,10 @@ void TrackLengthMeshTally::write_data(double num_histories) {
       rval = mb->tag_set_data(amalg_error_handle, &t, 1, &amalg_rel_err);
       MB_CHK_SET_ERR_RET(rval, "Failed to set amalg_error");
       
-      /*std::cout << "Set amalg tally " << amalg_tally << " with error " 
+      /*
+      std::cout << "Set amalg tally " << amalg_tally << " with error " 
       				<< amalg_error << " in region " << region_int << std::endl;
-      	*/			
+      		*/		
     }
   }
 
@@ -735,6 +745,7 @@ void TrackLengthMeshTally::compute_tracklengths(const TallyEvent& event,
       }
       // Note: track_length is for the current tet; it is not the event tracklength
       add_score_to_mesh_tally(tet, weight, track_length, ebin);
+      add_score_to_amalg_tally(tet, weight, track_length, ebin, mb);
     }
   }
 
@@ -776,6 +787,7 @@ void TrackLengthMeshTally::compute_tracklengths(const TallyEvent& event,
     // if the point belongs to a tet, then we need to add the score
     if (tet > 0) {
       add_score_to_mesh_tally(tet, weight, track_length, ebin);
+      add_score_to_amalg_tally(tet, weight, track_length, ebin, mb);
     }
   }
 }
