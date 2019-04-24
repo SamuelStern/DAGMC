@@ -242,7 +242,33 @@ void TrackLengthMeshTally::write_data(double num_histories) {
     exit(1);
   }
   assert(rval == MB_SUCCESS);
+  
+  //Obtain the total volume of each amalg region for weighting scores in them
+  double amalg_volume[data->NUM_AMALG_REGIONS];
+  for (Range::const_iterator i = all_tets.begin(); i != all_tets.end(); ++i) {
+    EntityHandle t = *i;
 
+    CartVect v[4];
+
+    std::vector<EntityHandle> vtx;
+    mb->get_connectivity(&t, 1, vtx);
+    assert(vtx.size() == 4);
+
+    int k = 0;
+    for (std::vector<EntityHandle>::iterator j = vtx.begin(); j != vtx.end(); ++j) {
+      EntityHandle vertex = *j;
+      mb->get_coords(&vertex, 1, v[k++].array());
+    }
+
+    double volume = tet_volume(v[0], v[1], v[2], v[3]);
+    
+    //Obtain tag handle
+    rval = mb->tag_get_data(amalg_tag_handle, &t, 1, &amalg_region);
+    MB_CHK_SET_ERR_RET(rval, "Failed to get amalg tag handle");
+    int region_int = (int)(*amalg_region+0.5);
+    
+    amalg_volume[region_int] += volume;
+  }
 
   for (Range::const_iterator i = all_tets.begin(); i != all_tets.end(); ++i) {
     EntityHandle t = *i;
@@ -326,12 +352,20 @@ void TrackLengthMeshTally::write_data(double num_histories) {
     std::pair <double, double> amalg_data = data->get_amalg(region_int);
     double amalg_tally = amalg_data.first;
     double amalg_error = amalg_data.second;
+    
+    //Adjust score and error to reflect weighting or actual relative error
+    double amalg_rel_err = 0;
+    if (amalg_error != 0) {
+        amalg_rel_err = sqrt((amalg_error/(amalg_tally * amalg_tally)) - (1. / num_histories));
+    }
+    double region_volume = amalg_volume[region_int];
+    double amalg_score = (amalg_tally / (region_volume * num_histories));
    
-    if(region_int >= 0){
+    if(region_int > 0){
        //If a proper region is assigned set its amalg data accordingly
-      rval = mb->tag_set_data(amalg_tally_handle, &t, 1, &amalg_tally);
+      rval = mb->tag_set_data(amalg_tally_handle, &t, 1, &amalg_score);
       MB_CHK_SET_ERR_RET(rval, "Failed to set amalg_tally");
-      rval = mb->tag_set_data(amalg_error_handle, &t, 1, &amalg_error);
+      rval = mb->tag_set_data(amalg_error_handle, &t, 1, &amalg_rel_err);
       MB_CHK_SET_ERR_RET(rval, "Failed to set amalg_error");
       
       /*std::cout << "Set amalg tally " << amalg_tally << " with error " 

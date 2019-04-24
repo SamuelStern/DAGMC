@@ -84,7 +84,7 @@ class TallyData {
   double* get_scratch_data(int& length);
   
   //Tools for implementing amalgamation (that don't need a MOAB interface)
-  int NUM_AMALG_REGIONS = 8;
+  int NUM_AMALG_REGIONS = 100;
   
   /**
    * \brief get_tally_size

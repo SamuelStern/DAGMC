@@ -198,11 +198,11 @@ void MeshTally::add_score_to_amalg_tally(const moab::EntityHandle& tally_point,
   //Point index here is (amalg_region) elements past (NUM_AMALG_REGIONS)
   //elements before the end of the list. 
   unsigned int point_index = data->get_tally_size() - data->NUM_AMALG_REGIONS
-  							 + amalg_region_int;
+  							 + amalg_region_int - 1;
   							 
   /*
-  std::cout << "From tet " << tally_point << ", found region " << amalg_region_int;
-  std::cout << ". Added to tally: " << weighted_score << std::endl;
+  std::cout << "Found region " << amalg_region_int << ". Added to tally: ";
+  std::cout << weighted_score << " At position " << point_index << std::endl;
   */
 
   // add score to tally data for the current history

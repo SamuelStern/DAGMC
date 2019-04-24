@@ -129,12 +129,10 @@ void TallyData::end_history() {
     }
   }
   
-  std::cout << std::endl << "Added all normal tally element scores." << std::endl << std::endl;
-  
   // add sum of scores for all amalg regions to the amalg tally
   for (int region = 0; region < NUM_AMALG_REGIONS; region++ ) {
   	double& amalg_score = temp_tally_data.at(
-  			get_tally_size() - NUM_AMALG_REGIONS + region);
+  			get_tally_size() - NUM_AMALG_REGIONS + region - 1);
   	double& amTally = amalg_tally.at(region);
   	double& amError = amalg_error.at(region);
   	
